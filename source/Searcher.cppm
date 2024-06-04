@@ -15,7 +15,7 @@ using file_path = std::filesystem::path;
 using thread_pool = std::vector<std::thread>;
 
 
-void processFile(const std::string& substr, const file_path& filepath)
+inline void processFile(const std::string& substr, const file_path& filepath)
 {
 	std::fstream file(filepath, std::ios::in | std::ios::binary | std::ios::ate);
 
@@ -45,8 +45,6 @@ export inline void searchSubstr(uint32_t job_count, const std::string& substr, f
 
 	if (std::filesystem::exists(search_directory))
 	{
-		message("run search");
-
 		std::vector<file_path> files;
 
 		auto root_iter{ std::filesystem::recursive_directory_iterator(search_directory) };
@@ -83,6 +81,20 @@ export inline void searchSubstr(uint32_t job_count, const std::string& substr, f
 			}
 
 			// tail too
+			uint32_t iter{ 0u }, thread_id{ 0u };
+			const auto target_count{ total_files - files_per_thread_tail };
+
+			while (iter < files_per_thread_tail)
+			{
+				jobs_paths.at(thread_id).emplace_back(files.at(target_count + iter));
+
+				++thread_id;
+
+				if (thread_id >= job_count)
+					thread_id = 0u;
+
+				++iter;
+			}
 
 			for (auto job_index{ 0u }; job_index < job_count; ++job_index)
 			{
@@ -94,18 +106,6 @@ export inline void searchSubstr(uint32_t job_count, const std::string& substr, f
 					}
 				)));
 			}
-/*
-			for (const auto path : files)
-			{
-				pool.emplace_back(std::move(
-					std::thread([substr]()
-					{
-						processFile(substr, path);
-					}
-				)));
-			}
-*/
-			int y{ 0 };
 		}
 		else
 		{
