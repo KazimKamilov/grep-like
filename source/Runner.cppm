@@ -1,9 +1,9 @@
 export module runner;
 
-import <iostream>;
 import <string>;
 import <thread>;
 
+import msg;
 import searcher;
 
 
@@ -46,13 +46,14 @@ uint32_t getJobCountFromArg(const std::string& str)
 		if (const auto& str_num{ str.substr(comm.length()) }; isNumber(str_num))
 			jobs = std::stoul(str_num);
 		else
-			std::cout << wrong_jobs_str_desc << std::endl;
+			message(wrong_jobs_str_desc);
 
 		return jobs;
 	}
 	else
 	{
-		std::cout << wrong_jobs_str_desc << std::endl;
+		message(wrong_jobs_str_desc);
+
 		return 0u;
 	}
 }
@@ -63,7 +64,7 @@ export void run_search(const int argc, const char** argv)
 	{
 		case 1:
 		{
-			std::cout << noargs_desc << '\n' << help_desc << std::endl;
+			message("{}\n{}", noargs_desc, help_desc);
 		}
 		break;
 
@@ -73,11 +74,11 @@ export void run_search(const int argc, const char** argv)
 
 			if ((arg == "-h") || (arg == "--help"))
 			{
-				std::cout << help_desc << std::endl;
+				message(help_desc);
 			}
 			else
 			{
-				std::cout << noargs_desc << '\n' << help_desc << std::endl;
+				message("{}\n{}", noargs_desc, help_desc);
 			}
 		}
 		break;
@@ -86,6 +87,7 @@ export void run_search(const int argc, const char** argv)
 		{
 			std::string substr(argv[1]);
 			std::string path(argv[2]);
+
 			searchSubstr(std::thread::hardware_concurrency(), substr, path);
 		}
 		break;
@@ -102,13 +104,13 @@ export void run_search(const int argc, const char** argv)
 			if (const uint32_t job_count{ getJobCountFromArg(jobs) }; job_count > 0)
 				searchSubstr(job_count, substr, path);
 			else
-				std::cout << wrong_jobs_str_desc << std::endl;
+				message(wrong_jobs_str_desc);
 		}
 		break;
 
 		default:
 		{
-			std::cout << wrong_jobs_str_desc << std::endl;
+			message(wrong_jobs_str_desc);
 		}
 		break;
 	}

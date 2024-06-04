@@ -1,23 +1,51 @@
 export module searcher;
 
-import <iostream>;
 import <string>;
 import <vector>;
 import <filesystem>;
 import <fstream>;
+import <thread>;
+import <mutex>;
+import <algorithm>;
+
+import msg;
+
 
 using file_path = std::filesystem::path;
+using thread_pool = std::vector<std::thread>;
 
-static void processFile(const file_path& filepath)
+
+void processFile(const std::string& substr, const file_path& filepath)
 {
+	std::fstream file(filepath, std::ios::in | std::ios::binary | std::ios::ate);
 
+	if (file.good())
+	{
+		const auto file_size{ file.tellp() };
+		std::vector<char> filebuf(file_size);
+
+		file.seekp(std::ios::beg);
+
+		file.read(filebuf.data(), file_size);
+
+		if (std::search(filebuf.cbegin(), filebuf.cend(), substr.cbegin(), substr.cend()) != filebuf.cend())
+			message("Found in file: \"{}\"", filepath.string());
+	}
+	else
+	{
+		message("Cannot open \"{}\" file to check!", filepath.string());
+	}
+
+	file.close();
 }
 
 export inline void searchSubstr(uint32_t job_count, const std::string& substr, file_path&& search_directory)
 {
+	thread_pool pool;
+
 	if (std::filesystem::exists(search_directory))
 	{
-		std::cout << "run search" << std::endl;
+		message("run search");
 
 		std::vector<file_path> files;
 
@@ -29,21 +57,73 @@ export inline void searchSubstr(uint32_t job_count, const std::string& substr, f
 				files.emplace_back(entry.path());
 		}
 
-		const auto total_files{ files.size() };
+		const auto total_files{ static_cast<uint32_t>(files.size()) };
 
 		if (total_files >= job_count)
 		{
 			const auto files_per_thread{ total_files / job_count };
+			const auto files_per_thread_tail{ total_files % job_count };
+
+			std::vector<std::vector<file_path>> jobs_paths(static_cast<size_t>(job_count));
+
+			auto begin_iter{ files.cbegin() };
+
+			for(auto i{ 0u }; i < job_count; ++i)
+			{
+				// copy iter
+				auto iter_end{ begin_iter };
+
+				// move end iter
+				std::advance(iter_end, files_per_thread);
+
+				jobs_paths.at(i) = std::vector<file_path>(begin_iter, iter_end);
+
+				// move begin iter
+				std::advance(begin_iter, files_per_thread);
+			}
+
+			// tail too
+
+			for (auto job_index{ 0u }; job_index < job_count; ++job_index)
+			{
+				pool.emplace_back(std::move(
+					std::thread([substr, vec{ jobs_paths.at(job_index) }]()
+					{
+						for(const auto& path : vec)
+							processFile(substr, path);
+					}
+				)));
+			}
+/*
+			for (const auto path : files)
+			{
+				pool.emplace_back(std::move(
+					std::thread([substr]()
+					{
+						processFile(substr, path);
+					}
+				)));
+			}
+*/
+			int y{ 0 };
 		}
 		else
 		{
-
+			// make path copy
+			for (const auto path : files)
+			{
+				pool.emplace_back(std::move(
+					std::thread(processFile, substr, path)
+				));
+			}
 		}
-
-		int y{0};
 	}
 	else
 	{
-		std::cout << "There is no directory path \"" << search_directory << "\"!" << std::endl;
+		message("There is no directory path \"{}\"", search_directory.string());
 	}
+
+	// wait for done
+	for (auto& thread : pool)
+		thread.join();
 }
