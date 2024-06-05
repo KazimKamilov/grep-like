@@ -23,8 +23,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEAS
 # SOME TESTS
 ################################
 
-set(TESTS_FOLDER "tests")
-
 file(GLOB TESTS_FILES ${CMAKE_CURRENT_LIST_DIR}/tests/*.cpp)
 
 foreach(TEST_FILE ${TESTS_FILES})

@@ -3,8 +3,8 @@
 
 import runner;
 
-TEST_CASE("test case #1")
+TEST_CASE("test case #3")
 {
-    const char* argv[] = { "test1", "-j4", "actor", "configs" };
+    const char* argv[] = { "test3", "wpn", "configs" };
     run_search(sizeof(argv) / sizeof(const char*), argv);
 }
