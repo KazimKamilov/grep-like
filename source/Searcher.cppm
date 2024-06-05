@@ -19,6 +19,7 @@ using thread_pool = std::vector<std::thread>;
 */
 inline void processFile(const std::string& substr, const file_path& filepath)
 {
+    // Opens file, and set cursor to end
     std::fstream file(filepath, std::ios::in | std::ios::binary | std::ios::ate);
 
     if (file.good())
@@ -30,6 +31,9 @@ inline void processFile(const std::string& substr, const file_path& filepath)
 
         file.read(filebuf.data(), file_size);
 
+        // we don't need file anymore
+        file.close();
+
         if (std::search(filebuf.cbegin(), filebuf.cend(), substr.cbegin(), substr.cend()) != filebuf.cend())
             message("Found in file: \"{}\"", filepath.string());
     }
@@ -37,8 +41,6 @@ inline void processFile(const std::string& substr, const file_path& filepath)
     {
         message("Cannot open \"{}\" file to check!", filepath.string());
     }
-
-    file.close();
 }
 
 /**
