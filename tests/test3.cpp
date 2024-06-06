@@ -5,6 +5,6 @@ import runner;
 
 TEST_CASE("test case #3")
 {
-    const char* argv[] = { "test3", "wpn", "configs" };
+    const char* argv[] = { "test3", "wpn", "data" };
     run_search(sizeof(argv) / sizeof(const char*), argv);
 }
