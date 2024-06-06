@@ -13,7 +13,7 @@ source_group(${ROOT_FOLDER} FILE_SET CXX_MODULES FILES ${APP_MODULES} ${CMAKE_CU
 
 add_executable(${PROJECT_NAME} ${APP_MODULES} ${CMAKE_CURRENT_LIST_DIR}/source/Main.cpp)
 
-target_compile_options(${PROJECT_NAME} PRIVATE /MP /MT)
+target_compile_options(${PROJECT_NAME} PRIVATE /MP /MT /GL /Ox /Oi /Ot)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/DEBUG")
 set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_LIST_DIR}/bin")
@@ -34,7 +34,7 @@ foreach(TEST_FILE ${TESTS_FILES})
 
     add_executable(${TEST_FILENAME} ${APP_MODULES} ${TEST_FILE})
 
-    target_compile_options(${TEST_FILENAME} PRIVATE /MP /MT)
+    target_compile_options(${TEST_FILENAME} PRIVATE /MP /MT /GL /Ox /Oi /Ot)
     target_link_libraries(${TEST_FILENAME} PRIVATE Catch2 Catch2Main)
     set_target_properties(${TEST_FILENAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_LIST_DIR}/bin")
     set_target_properties(${TEST_FILENAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_LIST_DIR}/bin")
