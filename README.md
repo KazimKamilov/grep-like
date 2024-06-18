@@ -1,2 +1,3 @@
 # grep-like
-test work
+
+Search for desired substring inside directory files recursively.
